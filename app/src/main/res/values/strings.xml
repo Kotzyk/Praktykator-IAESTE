@@ -4,4 +4,9 @@
     <string name="title_activity_splash_screen">SplashScreen</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="protocol">pop3</string>
+    <string name="host">pop.gmail.com</string>
+    <string name="port">995</string>
+    <string name="userName">iaesteaghpraktyki</string>
+    <string name="password">projektandroid</string>
 </resources>
