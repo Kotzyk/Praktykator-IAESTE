@@ -5,8 +5,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import pl.edu.agh.iaeste.praktykator.R;
-
 public class Splash extends Activity {
 
     @Override

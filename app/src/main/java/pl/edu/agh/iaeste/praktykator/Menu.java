@@ -10,6 +10,14 @@ import android.widget.ListView;
 /**
  * Created by Mateusz on 2015-11-29.
  */
+        String protocol = "pop3";
+        String host = "pop.gmail.com";
+        String port = "995";
+        String userName = "iaesteaghpraktyki";
+        String password = "projektandroid";
+
+        EmailReceiver receiver = new EmailReceiver();
+        receiver.downloadEmails(protocol, host, port, userName, password);
 
 public class Menu extends ListActivity{
  String pliki[] = {"MainActivity","dwa","trzy","cztery","piec"};
