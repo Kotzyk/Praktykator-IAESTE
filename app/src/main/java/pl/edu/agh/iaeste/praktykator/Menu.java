@@ -25,8 +25,8 @@ public class Menu extends ListActivity {
     String protocol = "imaps";
     String host = "imaps.gmail.com";
     String port = "993";
-    String usr = "matico575@gmail.com";
-    String pwd = "4PanceriPies";
+    String usr = "iaestepraktyki";
+    String pwd = "projektandroid";
     Message[] maile;
 
     @Override
@@ -86,7 +86,8 @@ public class Menu extends ListActivity {
             System.out.println("Could not connect to the message store");
             ex.printStackTrace();
         }
-            setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, maile));
+            //Wiem, ze to nie dziala, ale to tylko tak testowo
+            // setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, maile));
     }
 
 
