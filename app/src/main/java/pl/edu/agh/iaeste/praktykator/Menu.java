@@ -25,7 +25,7 @@ public class Menu extends ListActivity {
     String protocol = "imaps";
     String host = "imaps.gmail.com";
     String port = "993";
-    String usr = "iaestepraktyki";
+    String usr = "iaesteaghpraktyki";
     String pwd = "projektandroid";
     Message[] maile;
 
