@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.mail.Address;
@@ -138,7 +139,16 @@ public class Menu extends ListActivity {
 
         @Override
         protected void onPostExecute(Message[] results) {
-            activity.setListAdapter(new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, results));
+            ArrayList<String> mailTitles = new ArrayList<>();
+            for(Message mail : results){
+                try {
+                    mailTitles.add(mail.getSubject());
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                }
+            }
+            activity.setListAdapter(new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, mailTitles));
+
         }
 
         private String parseAddresses(Address[] address) {
