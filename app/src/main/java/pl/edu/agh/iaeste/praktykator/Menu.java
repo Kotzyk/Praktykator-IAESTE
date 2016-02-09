@@ -4,11 +4,13 @@ import android.app.ListActivity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -27,6 +29,7 @@ public class Menu extends ListActivity {
     String port = "993";
     String usr = "iaesteaghpraktyki@gmail.com";
     String pwd = "projektandroid";
+    File saveDirectory = new File(Environment.getExternalStorageDirectory() + "/storage/external_SD/documents");
     Message[] maile;
 
     @Override
