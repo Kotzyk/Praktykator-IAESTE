@@ -67,7 +67,7 @@ public class Menu extends ListActivity {
 
         // user props
         properties.setProperty("username", usr);
-        properties.setProperty("password",pwd);
+        properties.setProperty("password", pwd);
 
         // server setting
         properties.setProperty("mail.store.protocol", protocol);
@@ -85,52 +85,8 @@ public class Menu extends ListActivity {
     private void checkAttachment(int messageId) throws MessagingException, IOException {
 
         Message message = maile[messageId];
-        Multipart multipart = (Multipart) message.getContent();
+        new AttachmentDownloader(this).execute(message);
 
-        if(multipart == null){
-            logMessage("Menu", "multipart == null");
-        }
-
-        if(multipart.getCount() == 0){
-            logMessage("Menu", "No attachments for message id: " + messageId);
-        }
-
-        for (int i = 0; i < multipart.getCount(); i++) {
-            MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(i);
-            if(!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
-                logMessage("Menu", "Attachment " + bodyPart.getFileName() + " is not an attachment, sir.");
-                continue;
-            }
-
-            logMessage("Menu", "Trying to download: " + bodyPart.getFileName());
-
-            File path = new File(savePath);
-            if(!path.exists()){
-                logMessage("Menu", "Path: " + savePath + " does not exists. Creating...");
-                path.mkdir();
-            }else{
-                logMessage("Menu", "Path: " + savePath + " exists");
-            }
-
-            logMessage("Menu", "New file path: " + savePath + bodyPart.getFileName());
-
-            File attachment = new File(savePath + bodyPart.getFileName());
-
-            if(!attachment.exists()){
-                attachment.createNewFile();
-            }
-
-            bodyPart.saveFile(attachment);
-
-            logMessage("Menu", "Saved file " + bodyPart.getFileName() + " to " + savePath);
-        }
-    }
-
-    private void logMessage(String tag, CharSequence msg){
-        Log.v(tag, msg.toString());
-
-        Toast toast = Toast.makeText(this, msg, Toast.LENGTH_SHORT);
-        toast.show();
     }
 
     private class EmailDownloader extends AsyncTask<Properties, Void, Message[]> {
@@ -192,9 +148,9 @@ public class Menu extends ListActivity {
 
                 maile = messages.clone();
 
-                // disconnect
-                inbox.close(false);
-                store.close();
+                // Don't disconnect the fucker
+                //inbox.close(false);
+                //store.close();
 
             } catch (NoSuchProviderException ex) {
                 Log.e("EmailDownloader", "No provider for protocol: " + protocol);
@@ -234,6 +190,84 @@ public class Menu extends ListActivity {
             }
 
             return listAddress;
+        }
+
+    }
+
+    private class AttachmentDownloader extends AsyncTask<Message, Void, Void>{
+
+        private Menu activity;
+
+        public AttachmentDownloader(Menu activity){
+            this.activity = activity;
+        }
+
+        @Override
+        protected Void doInBackground(Message... messages) {
+            Message message = messages[0];
+
+            Multipart multipart = null;
+            try {
+                multipart = (Multipart) message.getContent();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+
+            if(multipart == null){
+                logMessage("Menu", "multipart == null");
+            }
+
+            try {
+                for (int i = 0; i < multipart.getCount(); i++) {
+                    MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(i);
+                    if(!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
+                        logMessage("Menu", "Attachment " + bodyPart.getFileName() + " is not an attachment, sir.");
+                        continue;
+                    }
+
+                    logMessage("Menu", "Trying to download: " + bodyPart.getFileName());
+
+                    File path = new File(savePath);
+                    if(!path.exists()){
+                        logMessage("Menu", "Path: " + savePath + " does not exists. Creating...");
+                        path.mkdir();
+                    }else{
+                        logMessage("Menu", "Path: " + savePath + " exists");
+                    }
+
+                    logMessage("Menu", "New file path: " + savePath + bodyPart.getFileName());
+
+                    File attachment = new File(savePath + bodyPart.getFileName());
+
+                    if(!attachment.exists()){
+                        attachment.createNewFile();
+                    }
+
+                    bodyPart.saveFile(attachment);
+
+                    logMessage("Menu", "Saved file " + bodyPart.getFileName() + " to " + savePath + bodyPart.getFileName());
+                }
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        private void logMessage(String tag, final CharSequence msg){
+            Log.v(tag, msg.toString());
+
+            runOnUiThread(new Runnable() {
+                public void run() {
+
+                    Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
+                }
+            });
+
         }
 
     }
