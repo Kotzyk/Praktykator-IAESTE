@@ -9,19 +9,24 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.mail.Address;
 import javax.mail.Folder;
+import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
+import javax.mail.internet.MimeBodyPart;
 
 public class Menu extends ListActivity {
     String protocol = "imaps";
@@ -29,7 +34,9 @@ public class Menu extends ListActivity {
     String port = "993";
     String usr = "iaesteaghpraktyki@gmail.com";
     String pwd = "projektandroid";
-    File saveDirectory = new File(Environment.getExternalStorageDirectory() + "/storage/external_SD/documents");
+
+    final String savePath = Environment.getExternalStorageDirectory() + "/attachments/";
+
     Message[] maile;
 
     @Override
@@ -45,6 +52,14 @@ public class Menu extends ListActivity {
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
+
+        try {
+            checkAttachment(position);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private Properties getServerProperties(String protocol, String host, String port) {
@@ -65,6 +80,57 @@ public class Menu extends ListActivity {
 
         return properties;
 
+    }
+
+    private void checkAttachment(int messageId) throws MessagingException, IOException {
+
+        Message message = maile[messageId];
+        Multipart multipart = (Multipart) message.getContent();
+
+        if(multipart == null){
+            logMessage("Menu", "multipart == null");
+        }
+
+        if(multipart.getCount() == 0){
+            logMessage("Menu", "No attachments for message id: " + messageId);
+        }
+
+        for (int i = 0; i < multipart.getCount(); i++) {
+            MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(i);
+            if(!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
+                logMessage("Menu", "Attachment " + bodyPart.getFileName() + " is not an attachment, sir.");
+                continue;
+            }
+
+            logMessage("Menu", "Trying to download: " + bodyPart.getFileName());
+
+            File path = new File(savePath);
+            if(!path.exists()){
+                logMessage("Menu", "Path: " + savePath + " does not exists. Creating...");
+                path.mkdir();
+            }else{
+                logMessage("Menu", "Path: " + savePath + " exists");
+            }
+
+            logMessage("Menu", "New file path: " + savePath + bodyPart.getFileName());
+
+            File attachment = new File(savePath + bodyPart.getFileName());
+
+            if(!attachment.exists()){
+                attachment.createNewFile();
+            }
+
+            bodyPart.saveFile(attachment);
+
+            logMessage("Menu", "Saved file " + bodyPart.getFileName() + " to " + savePath);
+        }
+    }
+
+    private void logMessage(String tag, CharSequence msg){
+        Log.v(tag, msg.toString());
+
+        Toast toast = Toast.makeText(this, msg, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     private class EmailDownloader extends AsyncTask<Properties, Void, Message[]> {
@@ -123,6 +189,7 @@ public class Menu extends ListActivity {
                         }
                     }
                 }
+
                 maile = messages.clone();
 
                 // disconnect
@@ -150,7 +217,7 @@ public class Menu extends ListActivity {
                     e.printStackTrace();
                 }
             }
-            activity.setListAdapter(new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, mailTitles));
+            activity.setListAdapter(new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, mailTitles));
 
         }
 
